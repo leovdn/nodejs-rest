@@ -1,0 +1,22 @@
+{
+  "name": "projeto-nodejs-rest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leovdn/nodejs-rest.git"
+  },
+  "author": "Leonardo Dantas",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leovdn/nodejs-rest/issues"
+  },
+  "homepage": "https://github.com/leovdn/nodejs-rest#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
