@@ -23,4 +23,10 @@ module.exports = (app) => {
 
     Attendance.change(id, values, res);
   });
+
+  app.delete("/atendimentos/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+
+    Attendance.delete(id, res);
+  });
 };
