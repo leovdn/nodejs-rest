@@ -16,4 +16,11 @@ module.exports = (app) => {
 
     Attendance.add(attendance, res);
   });
+
+  app.patch("/atendimentos/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const values = req.body;
+
+    Attendance.change(id, values, res);
+  });
 };
