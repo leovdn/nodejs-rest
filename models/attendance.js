@@ -2,20 +2,69 @@ const moment = require("moment");
 const connection = require("../infra/connection");
 
 class Attendance {
-  add(attendance) {
+  add(attendance, res) {
     const dateCreated = moment().format("YYYY-MM-DD HH:MM:SS");
     const date = moment(attendance.date, "DD/MM/YYYY").format(
       "YYYY-MM-DD HH:MM:SS"
     );
-    const createdAttendance = { ...attendance, dateCreated, date };
+    const isDateValid = moment(date).isSameOrAfter(dateCreated);
+    const isClientValid = attendance.client.length >= 5;
 
-    const sql = "INSERT INTO attendances SET ?";
+    const validations = [
+      {
+        name: "date",
+        valid: isDateValid,
+        message: "Data deve ser maior ou igual a data atual",
+      },
+      {
+        name: "cliennt",
+        valid: isClientValid,
+        message: "Cliente deve ter pelo menos 5 caracteres",
+      },
+    ];
 
-    connection.query(sql, createdAttendance, (error, results) => {
+    const errors = validations.filter((field) => !field.valid);
+    const isThereErrors = errors.length;
+
+    if (isThereErrors) {
+      res.status(400).json(errors);
+    } else {
+      const createdAttendance = { ...attendance, dateCreated, date };
+
+      const sql = "INSERT INTO attendances SET ?";
+
+      connection.query(sql, createdAttendance, (error, results) => {
+        if (error) {
+          res.status(400).json(error);
+        } else {
+          res.status(201).json(results);
+        }
+      });
+    }
+  }
+
+  list(res) {
+    const sql = "SELECT * FROM attendances";
+
+    connection.query(sql, (error, results) => {
       if (error) {
-        console.log(error);
+        res.status(400).json(error);
       } else {
-        console.log(results);
+        res.status(200).json(results);
+      }
+    });
+  }
+
+  searchById(id, res) {
+    const sql = `SELECT * FROM attendances WHERE id=${id}`;
+
+    connection.query(sql, (error, results) => {
+      const attendance = results[0];
+
+      if (error) {
+        res.status(400).json(error);
+      } else {
+        res.status(200).json(attendance);
       }
     });
   }
