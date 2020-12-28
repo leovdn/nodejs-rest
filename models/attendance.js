@@ -18,7 +18,7 @@ class Attendance {
         message: 'Data deve ser maior ou igual a data atual',
       },
       {
-        name: 'cliennt',
+        name: 'client',
         valid: isClientValid,
         message: 'Cliente deve ter pelo menos 5 caracteres',
       },
