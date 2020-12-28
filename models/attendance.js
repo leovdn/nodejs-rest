@@ -1,45 +1,62 @@
 const { default: axios } = require('axios');
 const moment = require('moment');
-const connection = require('../infra/connection');
+const connection = require('../infra/database/connection');
+const repository = require('../repositories/attendances');
 
 class Attendance {
-  add(attendance, res) {
-    const dateCreated = moment().format('YYYY-MM-DD HH:MM:SS');
-    const date = moment(attendance.date, 'DD/MM/YYYY').format(
-      'YYYY-MM-DD HH:MM:SS'
-    );
-    const isDateValid = moment(date).isSameOrAfter(dateCreated);
-    const isClientValid = attendance.client.length >= 5;
+  constructor() {
+    this.isDateValid = ({ date, dateCreated }) =>
+      moment(date).isSameOrAfter(dateCreated);
 
-    const validations = [
+    this.isClientValid = (length) => length >= 5;
+
+    this.validate = (params) => {
+      this.validations.filter((field) => {
+        const { name } = field;
+        const param = params[name];
+
+        return !field.valid(param);
+      });
+    };
+
+    this.validations = [
       {
         name: 'date',
-        valid: isDateValid,
+        valid: this.isDateValid,
         message: 'Data deve ser maior ou igual a data atual',
       },
       {
         name: 'client',
-        valid: isClientValid,
+        valid: this.isClientValid,
         message: 'Cliente deve ter pelo menos 5 caracteres',
       },
     ];
+  }
 
-    const errors = validations.filter((field) => !field.valid);
+  add(attendance) {
+    const dateCreated = moment().format('YYYY-MM-DD HH:MM:SS');
+    const date = moment(attendance.date, 'DD/MM/YYYY').format(
+      'YYYY-MM-DD HH:MM:SS'
+    );
+
+    const params = {
+      date: { date, dateCreated },
+      client: { length: attendance.client.length },
+    };
+
+    const errors = this.validate(params);
     const isThereErrors = errors.length;
 
     if (isThereErrors) {
-      res.status(400).json(errors);
+      return new Promise((resolve, reject) => {
+        reject(errors);
+      });
     } else {
       const createdAttendance = { ...attendance, dateCreated, date };
 
-      const sql = 'INSERT INTO attendances SET ?';
-
-      connection.query(sql, createdAttendance, (error, results) => {
-        if (error) {
-          res.status(400).json(error);
-        } else {
-          res.status(201).json(attendance);
-        }
+      return repository.add(createdAttendance).then((results) => {
+        const id = results.insertId;
+        return { ...attendance, id };
       });
     }
   }
