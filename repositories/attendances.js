@@ -5,6 +5,12 @@ class Attendance {
     const sql = 'INSERT INTO attendances SET ?';
     return query(sql, attendance);
   }
+
+  list() {
+    const sql = 'SELECT * FROM attendances';
+
+    return query(sql);
+  }
 }
 
 module.exports = new Attendance();
